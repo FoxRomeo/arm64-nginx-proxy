@@ -1,7 +1,6 @@
 FROM arm64v8/nginx:1.16.0-alpine
 ENV NGINX_VERSION 1.16.0
 
-
 MAINTAINER docker@intrepid.de
 
 ENV DOCKER_GEN_VERSION 0.7.4
@@ -11,8 +10,6 @@ ENV DOCKER_GEN_VERSION 0.7.4
 ADD ./forego /usr/local/bin/forego
 RUN chmod u+x /usr/local/bin/forego && \
     passwd -l root ; \
-#    apk upgrade --no-cache && \
-#    apk --no-cache add --virtual .run-deps \
     apk --update --upgrade --no-cache add \
       ca-certificates \
       bash \
