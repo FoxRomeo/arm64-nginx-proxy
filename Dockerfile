@@ -1,4 +1,4 @@
-FROM arm64v8/nginx:1.17-alpine
+FROM arm64v8/nginx:stable-alpine
 MAINTAINER docker@intrepid.de
 
 ENV DOCKER_GEN_VERSION 0.7.4
