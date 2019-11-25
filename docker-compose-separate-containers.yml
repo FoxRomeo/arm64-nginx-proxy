@@ -9,7 +9,7 @@ services:
       - /etc/nginx/conf.d
 
   dockergen:
-    image: jwilder/docker-gen
+    image: intrepidde/arm64-docker-gen
     command: -notify-sighup nginx -watch /etc/docker-gen/templates/nginx.tmpl /etc/nginx/conf.d/default.conf
     volumes_from:
       - nginx
@@ -17,7 +17,7 @@ services:
       - /var/run/docker.sock:/tmp/docker.sock:ro
       - ./nginx.tmpl:/etc/docker-gen/templates/nginx.tmpl
 
-  whoami:
-    image: jwilder/whoami
-    environment:
-      - VIRTUAL_HOST=whoami.local
+#  whoami:
+#    image: jwilder/whoami
+#    environment:
+#      - VIRTUAL_HOST=whoami.local
