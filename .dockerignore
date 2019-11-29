@@ -4,4 +4,4 @@ circle.yml
 Makefile
 README.md
 test
-build.sh
+action.sh

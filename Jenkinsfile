@@ -21,6 +21,8 @@ pipeline {
 		SECONDARYREGISTRY = "nexus.intrepid.local:4000"
 		SECONDARYNAME = "${NAME}"
 		TARGETSTRING = "NGINX_VERSION"
+		BASETYPE = "nginx"
+		BASECONTAINER = "arm64v8/nginx:stable-alpine"
 	}
 	stages {
 		stage('Build') {

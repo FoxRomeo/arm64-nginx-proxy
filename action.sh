@@ -8,6 +8,7 @@
 #  5 "Dockerfile.${BASETYPE}" not found
 #  6 TARGETBATCH result was empty
 #  7 no ACTION type is set (build, push, all)
+#  8 BASESCRIPT did run with error
 
 if [ -n "${DEBUG}" ]; then
  set -x
@@ -39,7 +40,7 @@ fi
 
 if [ "${ACTION}" == "build" ] || [ "${ACTION}" == "all" ]; then
 # Start of action "build"
-  if [ -n "${BASECONTAINER}" ]; then
+  if [ -n "${BASECONTAINER}" ] && [ -z "${BASESCRIPT}" ]; then
     if [ -z "${BASETYPE}" ]; then
       exit 4
     else
@@ -50,6 +51,11 @@ if [ "${ACTION}" == "build" ] || [ "${ACTION}" == "all" ]; then
       else
         exit 5
       fi
+    fi
+  elif [ -n "${BASESCRIPT}" ]; then
+    DOCKERFILE="`/bin/bash ${BASESCRIPT}`"
+    if [ $? -ne 0 ]; then
+      exit 8
     fi
   else
     DOCKERFILE="Dockerfile"
