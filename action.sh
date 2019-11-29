@@ -70,6 +70,11 @@ if [ "${ACTION}" == "build" ] || [ "${ACTION}" == "all" ]; then
     sed -i s~"${SOFTWARESTRING}"~"${SOFTWAREVERSION}"~g "${DOCKERFILE}"
   fi
 
+  if [ -n "${RUNADDITIONALCONTAINER}" ]; then
+    docker pull "${RUNADDITIONALCONTAINER}"
+    docker run -t --rm ${RUNADDITIONALCONTAINERPARAMS} ${RUNADDITIONALCONTAINER}
+  fi
+
   docker pull `grep "^FROM " "${DOCKERFILE}" | cut -d" " -f2` && \
   docker build --no-cache --rm -t ${REGISTRY}/${NAME}:latest --file "${DOCKERFILE}" .
 

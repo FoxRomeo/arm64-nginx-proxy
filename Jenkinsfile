@@ -23,6 +23,10 @@ pipeline {
 		TARGETSTRING = "NGINX_VERSION"
 		BASETYPE = "nginx"
 		BASECONTAINER = "arm64v8/nginx:stable-alpine"
+		SECONDARYSOFTWAREVERSION = "0.7.4"
+		SECONDARYSOFTWARESTRING = "<<DOCKERGENVERSION>>"
+		RUNADDITIONALCONTAINER = "nexus.intrepid.local:4000/rpi-forego:latest"
+		RUNADDITIONALCONTAINERPARAMS = "-v \"\${PWD}\":/export"
 	}
 	stages {
 		stage('Build') {

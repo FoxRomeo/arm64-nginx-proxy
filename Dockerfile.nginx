@@ -1,7 +1,7 @@
 FROM <<BASECONTAINER>>
 MAINTAINER docker@intrepid.de
 
-ENV DOCKER_GEN_VERSION 0.7.4
+ENV DOCKER_GEN_VERSION <<DOCKERGENVERSION>>
 
 # Install wget and install/updates certificates
 # Install Forego
