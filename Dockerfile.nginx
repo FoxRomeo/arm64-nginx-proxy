@@ -1,3 +1,7 @@
+FROM <<TRANSFER>>
+RUN cd /go/src/github.com/FoxRomeo/arm64-forego && go build && cp arm64-forego /forego
+
+
 FROM <<BASECONTAINER>>
 MAINTAINER docker@intrepid.de
 
@@ -5,7 +9,9 @@ ENV DOCKER_GEN_VERSION <<DOCKERGENVERSION>>
 
 # Install wget and install/updates certificates
 # Install Forego
-ADD ./forego /usr/local/bin/forego
+COPY --from=<<TRANSFER>> /forego /usr/local/bin/forego
+
+# Configure Nginx and apply fix for very long server names
 RUN chmod u+x /usr/local/bin/forego && \
     passwd -l root ; \
     apk --update --upgrade --no-cache add \
@@ -13,8 +19,7 @@ RUN chmod u+x /usr/local/bin/forego && \
       bash \
       wget \
       openssl && \
-    update-ca-certificates && \
-# Configure Nginx and apply fix for very long server names
+    update-ca-certificates ; \
     echo "daemon off;" >> /etc/nginx/nginx.conf && \
     sed -i 's/worker_processes  1/worker_processes  auto/' /etc/nginx/nginx.conf && \
     wget --quiet https://github.com/jwilder/docker-gen/releases/download/$DOCKER_GEN_VERSION/docker-gen-alpine-linux-armhf-$DOCKER_GEN_VERSION.tar.gz && \
@@ -23,7 +28,8 @@ RUN chmod u+x /usr/local/bin/forego && \
     rm -rf /var/lib/apt/lists/* && \
     ln -sf /dev/stdout /var/log/nginx/access.log && \
     ln -sf /dev/stderr /var/log/nginx/error.log && \
-    rm -rf /var/www/localhost
+    rm -rf /var/www/localhost ; \
+    exit 0
 
 COPY network_internal.conf /etc/nginx/
 

@@ -7,8 +7,9 @@
 #  4 BASECONTAINER set, but not BASETYPE
 #  5 "Dockerfile.${BASETYPE}" not found
 #  6 TARGETBATCH result was empty
-#  7 no ACTION type is set (build, push, all)
+#  7 additional docker run failed
 #  8 BASESCRIPT did run with error
+#  9 docker build failed
 
 if [ -n "${DEBUG}" ]; then
  set -x
@@ -37,6 +38,7 @@ fi
 if [ -z "${TARGETVERSION}" ] && [ -z "${TARGETSTRING}" ] && [ -z "${TARGETRUNVERSION}" ]; then
   exit 2
 fi
+
 
 if [ "${ACTION}" == "build" ] || [ "${ACTION}" == "all" ]; then
 # Start of action "build"
@@ -70,16 +72,21 @@ if [ "${ACTION}" == "build" ] || [ "${ACTION}" == "all" ]; then
     sed -i s~"${SOFTWARESTRING}"~"${SOFTWAREVERSION}"~g "${DOCKERFILE}"
   fi
 
-  if [ -n "${RUNADDITIONALCONTAINER}" ]; then
-    docker pull "${RUNADDITIONALCONTAINER}"
-    docker run -t --rm ${RUNADDITIONALCONTAINERPARAMS} ${RUNADDITIONALCONTAINER}
+  for pull in $(grep "^FROM " "${DOCKERFILE}" | cut -d" " -f2)
+  do
+    docker pull $pull
+  done
+
+  if [ -n "${ADDITIONALCONTAINER}" ] && [ -n "${ADDITIONALCONTAINERSTRING}" ]; then
+    sed -i s~"^FROM ${ADDITIONALCONTAINERSTRING}"~"FROM ${ADDITIONALCONTAINER} AS ${NAME}-transfer"~g "${DOCKERFILE}"
+    sed -i s~"--from=${ADDITIONALCONTAINERSTRING}"~"--from=${NAME}-transfer"~g "${DOCKERFILE}"
   fi
 
-  docker pull `grep "^FROM " "${DOCKERFILE}" | cut -d" " -f2` && \
-  docker build --no-cache --rm -t ${REGISTRY}/${NAME}:latest --file "${DOCKERFILE}" .
+  docker build --no-cache --rm -t ${REGISTRY}/${NAME}:latest --file "./${DOCKERFILE}" . || exit 9
 
 # End of action "build"
-elif [ "${ACTION}" == "push" ] || [ "${ACTION}" == "all" ]; then
+fi
+if [ "${ACTION}" == "push" ] || [ "${ACTION}" == "all" ]; then
 # Start of action "push"
 
   if [ -n "${TARGETRUNVERSION}" ] && [ -z "${TARGETVERSION}" ]; then
@@ -114,9 +121,6 @@ elif [ "${ACTION}" == "push" ] || [ "${ACTION}" == "all" ]; then
     fi
   fi
 # End of action "push"
-else
-  # Error if no valid action was found
-  exit 7
 fi
 
 exit 0

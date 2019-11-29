@@ -2,9 +2,10 @@ pipeline {
 	agent {
 		label 'ARM64 && Docker'
 	}
-//	parameters {
+	parameters {
 //		string(name: 'OVERRIDE', defaultValue: 'stable', description: 'Version to use (tested with "stable" & "mainline")(don't add "-alpine")', trim: true)
-//	}
+		string(name: 'OVERRIDERUNADDITIONALCONTAINER', defaultValue: 'intrepidde/arm64-forego:latest', description: 'foergo container to use', trim: true)
+	}
 	triggers {
 		cron('H H(2-7) * * 2')
 	}
@@ -25,8 +26,9 @@ pipeline {
 		BASECONTAINER = "arm64v8/nginx:stable-alpine"
 		SECONDARYSOFTWAREVERSION = "0.7.4"
 		SECONDARYSOFTWARESTRING = "<<DOCKERGENVERSION>>"
-		RUNADDITIONALCONTAINER = "nexus.intrepid.local:4000/arm64-forego:latest"
-		RUNADDITIONALCONTAINERPARAMS = "-v `pwd`:/export"
+		ADDITIONALCONTAINER = "${OVERRIDERUNADDITIONALCONTAINER}"
+		ADDITIONALCONTAINERTRANSFER = "${NAME}-transport"
+		ADDITIONALCONTAINERSTRING = "<<TRANSFER>>"
 	}
 	stages {
 		stage('Build') {
