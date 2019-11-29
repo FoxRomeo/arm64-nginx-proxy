@@ -14,7 +14,7 @@ pipeline {
 		timestamps()
 	}
 	environment {
-//		DEBUG = "1"
+		DEBUG = "1"
 		REGISTRY = "intrepidde"
 		EMAIL_TO = 'olli.jenkins.prometheus@intrepid.de'
 		NAME = "arm64-nginx-proxy"
@@ -25,8 +25,8 @@ pipeline {
 		BASECONTAINER = "arm64v8/nginx:stable-alpine"
 		SECONDARYSOFTWAREVERSION = "0.7.4"
 		SECONDARYSOFTWARESTRING = "<<DOCKERGENVERSION>>"
-		RUNADDITIONALCONTAINER = "nexus.intrepid.local:4000/rpi-forego:latest"
-		RUNADDITIONALCONTAINERPARAMS = "-v \"\${PWD}\":/export"
+		RUNADDITIONALCONTAINER = "nexus.intrepid.local:4000/arm64-forego:latest"
+		RUNADDITIONALCONTAINERPARAMS = "-v `pwd`:/export"
 	}
 	stages {
 		stage('Build') {
