@@ -72,6 +72,10 @@ if [ "${ACTION}" == "build" ] || [ "${ACTION}" == "all" ]; then
     sed -i s~"${SOFTWARESTRING}"~"${SOFTWAREVERSION}"~g "${DOCKERFILE}"
   fi
 
+  if [ -n "${SECONDARYSOFTWAREVERSION}" ] && [ -n "${SECONDARYSOFTWARESTRING}" ]; then
+    sed -i s~"${SECONDARYSOFTWARESTRING}"~"${SECONDARYSOFTWAREVERSION}"~g "${DOCKERFILE}"
+  fi
+
   for pull in $(grep "^FROM " "${DOCKERFILE}" | cut -d" " -f2)
   do
     docker pull $pull
