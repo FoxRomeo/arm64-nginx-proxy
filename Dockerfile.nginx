@@ -21,11 +21,11 @@ RUN chmod u+x /usr/local/bin/forego && \
       openssl && \
     update-ca-certificates ; \
     echo "daemon off;" >> /etc/nginx/nginx.conf && \
-    sed -i 's/worker_processes  1/worker_processes  auto/' /etc/nginx/nginx.conf && \
-    wget --quiet https://github.com/jwilder/docker-gen/releases/download/$DOCKER_GEN_VERSION/docker-gen-alpine-linux-armhf-$DOCKER_GEN_VERSION.tar.gz && \
+    sed -i 's/worker_processes  1/worker_processes  auto/' /etc/nginx/nginx.conf
+RUN wget --quiet https://github.com/jwilder/docker-gen/releases/download/$DOCKER_GEN_VERSION/docker-gen-alpine-linux-armhf-$DOCKER_GEN_VERSION.tar.gz && \
     tar -C /usr/local/bin -xvzf docker-gen-alpine-linux-armhf-$DOCKER_GEN_VERSION.tar.gz && \
-    rm /docker-gen-alpine-linux-armhf-$DOCKER_GEN_VERSION.tar.gz && \
-    rm -rf /var/lib/apt/lists/* && \
+    rm /docker-gen-alpine-linux-armhf-$DOCKER_GEN_VERSION.tar.gz
+RUN rm -rf /var/lib/apt/lists/* && \
     ln -sf /dev/stdout /var/log/nginx/access.log && \
     ln -sf /dev/stderr /var/log/nginx/error.log && \
     rm -rf /var/www/localhost ; \
