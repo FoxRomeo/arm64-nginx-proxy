@@ -13,6 +13,7 @@ pipeline {
 //		skipStagesAfterUnstable()
 		disableResume()
 		timestamps()
+		timeout(time: 4, unit: 'HOURS') 
 	}
 	environment {
 		DEBUG = "1"
