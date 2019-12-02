@@ -32,15 +32,30 @@ pipeline {
 				label 'ARM64 && Docker'
 			}
 			environment {
-				ACTION = "all"
+//				ACTION = "all"
 				NAME = "arm64-nginx-proxy"
 				SECONDARYNAME = "${NAME}"
 				BASECONTAINER = "arm64v8/nginx:stable-alpine"
 				ADDITIONALCONTAINERTRANSFER = "${NAME}-transport"
 				ADDITIONALCONTAINER = "intrepidde/arm64-forego:latest"
 			}
-			steps {
-				sh '/bin/bash ./action.sh'
+			stages {
+				stage('Build'){
+					environment {
+						ACTION = "build"
+					}
+					steps {
+						sh '/bin/bash ./action.sh'
+					}
+				}
+				stage('Push'){
+					environment {
+						ACTION = "push"
+					}
+					steps {
+						sh '/bin/bash ./action.sh'
+					}
+				}
 			}
 		}
 		stage('ARM32V6') {
@@ -48,15 +63,30 @@ pipeline {
 				label 'arm32v6 && Docker'
 			}
 			environment {
-				ACTION = "all"
+//				ACTION = "all"
 				NAME = "rpi-nginx-proxy"
 				SECONDARYNAME = "${NAME}"
 				BASECONTAINER = "arm32v6/nginx:stable-alpine"
 				ADDITIONALCONTAINERTRANSFER = "${NAME}-transport"
 				ADDITIONALCONTAINER = "intrepidde/rpi-forego:latest"
 			}
-			steps {
-				sh '/bin/bash ./action.sh'
+			stages {
+				stage('Build'){
+					environment {
+						ACTION = "build"
+					}
+					steps {
+						sh '/bin/bash ./action.sh'
+					}
+				}
+				stage('Push'){
+					environment {
+						ACTION = "push"
+					}
+					steps {
+						sh '/bin/bash ./action.sh'
+					}
+				}
 			}
 		}
 	}
