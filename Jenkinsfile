@@ -13,13 +13,13 @@ pipeline {
 //		skipStagesAfterUnstable()
 		disableResume()
 		timestamps()
-		timeout(time: 4, unit: 'HOURS') 
 	}
 	environment {
 		DEBUG = "1"
+		NAMEBASE = "nginx-proxy"
 		REGISTRY = "intrepidde"
-		EMAIL_TO = 'olli.jenkins.prometheus@intrepid.de'
 		SECONDARYREGISTRY = "nexus.intrepid.local:4000"
+		EMAIL_TO = 'olli.jenkins.prometheus@intrepid.de'
 		TARGETSTRING = "NGINX_VERSION"
 		BASETYPE = "nginx"
 		SECONDARYSOFTWAREVERSION = "0.7.4"
@@ -31,9 +31,11 @@ pipeline {
 			agent {
 				label 'ARM64 && Docker'
 			}
+			options {
+				timeout(time: 1, unit: 'HOURS') 
+			}
 			environment {
-//				ACTION = "all"
-				NAME = "arm64-nginx-proxy"
+				NAME = "arm64-${NAMEBASE}"
 				SECONDARYNAME = "${NAME}"
 				BASECONTAINER = "arm64v8/nginx:stable-alpine"
 				ADDITIONALCONTAINERTRANSFER = "${NAME}-transport"
@@ -62,9 +64,11 @@ pipeline {
 			agent {
 				label 'arm32v6 && Docker'
 			}
+			options {
+				timeout(time: 4, unit: 'HOURS') 
+			}
 			environment {
-//				ACTION = "all"
-				NAME = "rpi-nginx-proxy"
+				NAME = "rpi-${NAMEBASE}"
 				SECONDARYNAME = "${NAME}"
 				BASECONTAINER = "arm32v6/nginx:stable-alpine"
 				ADDITIONALCONTAINERTRANSFER = "${NAME}-transport"
