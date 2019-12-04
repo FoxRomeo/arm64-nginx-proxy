@@ -7,7 +7,7 @@ pipeline {
 //		string(name: 'OVERRIDERUNADDITIONALCONTAINER', defaultValue: 'intrepidde/arm64-forego:latest', description: 'foergo container to use', trim: true)
 //	}
 	triggers {
-		cron('H H(3-8) * * 2')
+		cron('H H(3-8) * * 3')
 	}
 	options {
 //		skipStagesAfterUnstable()
