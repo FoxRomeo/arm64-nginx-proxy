@@ -35,10 +35,15 @@ if [ "${OVERRIDE}" != "latest" ] && [ -n "${OVERRIDE}" ]; then
   TARGETVERSION="${OVERRIDE}"
 fi
 
-if [ -z "${TARGETVERSION}" ] && [ -z "${TARGETSTRING}" ] && [ -z "${TARGETRUNVERSION}" ]; then
-  exit 2
+###
+# adding tagsuffix to tag "latest" before build
+# will be added to TARGETVERSION tag during push phase
+if [ -n "${TAGSUFFIX}" ]; then
+ LATEST="latest${TAGSUFFIX}"
+else
+ LATEST="latest"
 fi
-
+###
 
 if [ "${ACTION}" == "build" ] || [ "${ACTION}" == "all" ]; then
 # Start of action "build"
@@ -84,14 +89,19 @@ if [ "${ACTION}" == "build" ] || [ "${ACTION}" == "all" ]; then
   if [ -n "${ADDITIONALCONTAINER}" ] && [ -n "${ADDITIONALCONTAINERSTRING}" ]; then
     sed -i s~"^FROM ${ADDITIONALCONTAINERSTRING}"~"FROM ${ADDITIONALCONTAINER} AS ${NAME}-transfer"~g "${DOCKERFILE}"
     sed -i s~"--from=${ADDITIONALCONTAINERSTRING}"~"--from=${NAME}-transfer"~g "${DOCKERFILE}"
+    docker pull ${ADDITIONALCONTAINER}
   fi
 
-  docker build --no-cache --rm -t ${REGISTRY}/${NAME}:latest --file "./${DOCKERFILE}" . || exit 9
+  docker build --no-cache --rm -t ${REGISTRY}/${NAME}:${LATEST} --file "./${DOCKERFILE}" . || exit 9
 
-# End of action "build"
 fi
-if [ "${ACTION}" == "push" ] || [ "${ACTION}" == "all" ]; then
+# End of action "build"
+
 # Start of action "push"
+if [ "${ACTION}" == "push" ] || [ "${ACTION}" == "all" ]; then
+  if [ -z "${TARGETVERSION}" ] && [ -z "${TARGETSTRING}" ] && [ -z "${TARGETRUNVERSION}" ]; then
+    exit 2
+  fi
 
   if [ -n "${TARGETRUNVERSION}" ] && [ -z "${TARGETVERSION}" ]; then
     TARGETVERSION=`${TARGETRUNVERSION} ${REGISTRY}/${NAME}:latest`
@@ -107,21 +117,29 @@ if [ "${ACTION}" == "push" ] || [ "${ACTION}" == "all" ]; then
     fi
   fi
 
-  docker push ${REGISTRY}/${NAME}:latest && \
-  docker tag  ${REGISTRY}/${NAME}:latest ${REGISTRY}/${NAME}:${TARGETVERSION} && \
-  docker push ${REGISTRY}/${NAME}:${TARGETVERSION}
+  docker tag  ${REGISTRY}/${NAME}:${LATEST} ${REGISTRY}/${NAME}:${TARGETVERSION}${TAGSUFFIX}
+  if [ "${NOLATEST}" != "true" ]; then
+    docker push ${REGISTRY}/${NAME}:${LATEST}
+  else
+    docker rmi ${REGISTRY}/${NAME}:${LATEST}
+  fi
+  docker push ${REGISTRY}/${NAME}:${TARGETVERSION}${TAGSUFFIX}
 
   if [ -n "${SECONDARYREGISTRY}" ]; then
     if [ -n "${SECONDARYNAME}" ]; then
-      docker tag  ${REGISTRY}/${NAME}:latest ${SECONDARYREGISTRY}/${SECONDARYNAME}:latest && \
-      docker push ${SECONDARYREGISTRY}/${SECONDARYNAME}:latest
-      docker tag  ${REGISTRY}/${NAME}:${TARGETVERSION} ${SECONDARYREGISTRY}/${SECONDARYNAME}:${TARGETVERSION} && \
-      docker push ${SECONDARYREGISTRY}/${SECONDARYNAME}:${TARGETVERSION}
+      if [ "${NOLATEST}" != "true" ]; then
+        docker tag  ${REGISTRY}/${NAME}:${LATEST} ${SECONDARYREGISTRY}/${SECONDARYNAME}:${LATEST} && \
+        docker push ${SECONDARYREGISTRY}/${SECONDARYNAME}:${LATEST}
+      fi
+      docker tag  ${REGISTRY}/${NAME}:${TARGETVERSION}${TAGSUFFIX} ${SECONDARYREGISTRY}/${SECONDARYNAME}:${TARGETVERSION}${TAGSUFFIX} && \
+      docker push ${SECONDARYREGISTRY}/${SECONDARYNAME}:${TARGETVERSION}${TAGSUFFIX}
     else
-      docker tag  ${REGISTRY}/${NAME}:latest ${SECONDARYREGISTRY}/${NAME}:latest && \
-      docker push ${SECONDARYREGISTRY}/${NAME}:latest
-      docker tag  ${REGISTRY}/${NAME}:${TARGETVERSION} ${SECONDARYREGISTRY}/${NAME}:${TARGETVERSION} && \
-      docker push ${SECONDARYREGISTRY}/${NAME}:${TARGETVERSION}
+      if [ "${NOLATEST}" != "true" ]; then
+        docker tag  ${REGISTRY}/${NAME}:${LATEST} ${SECONDARYREGISTRY}/${NAME}:${LATEST} && \
+        docker push ${SECONDARYREGISTRY}/${NAME}:${LATEST}
+      fi
+      docker tag  ${REGISTRY}/${NAME}:${TARGETVERSION}${TAGSUFFIX} ${SECONDARYREGISTRY}/${NAME}:${TARGETVERSION}${TAGSUFFIX} && \
+      docker push ${SECONDARYREGISTRY}/${NAME}:${TARGETVERSION}${TAGSUFFIX}
     fi
   fi
 # End of action "push"
